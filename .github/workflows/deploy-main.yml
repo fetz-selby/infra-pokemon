@@ -75,7 +75,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build the app service using production docker-compose
-          docker-compose -f docker-compose.prod.yml build app
+          docker compose -f docker-compose.prod.yml build app
 
           # Tag the built image for ECR
           docker tag beta-pokemon-app:latest $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
