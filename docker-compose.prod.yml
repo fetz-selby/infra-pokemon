@@ -1,6 +1,7 @@
 services:
   app:
     container_name: beta-pokemon-app
+    image: beta-pokemon-app:latest
     build:
       context: .
       dockerfile: Dockerfile.prod
