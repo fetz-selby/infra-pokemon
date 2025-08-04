@@ -20,7 +20,7 @@ name: Deploy to Amazon ECS with Pulumi
 
 on:
   push:
-    branches: ['main']
+    branches: ['advance']
 
 env:
   AWS_REGION: us-east-1 # set this to your preferred AWS region
