@@ -1,0 +1,129 @@
+# This workflow will use Pulumi to provision AWS infrastructure (ECR, ECS),
+# build and push a container image to Amazon ECR, and deploy to Amazon ECS.
+#
+# To use this workflow, you will need to complete the following set-up steps:
+#
+# 1. Set up Pulumi:
+#    - Create a Pulumi account and get an access token
+#    - Store the token in GitHub Actions secrets as `PULUMI_ACCESS_TOKEN`
+#
+# 2. Configure AWS credentials:
+#    - Store IAM user access key in GitHub Actions secrets as `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+#    - Ensure the IAM user has permissions for ECR, ECS, and other required AWS services
+#
+# 3. Update environment variables below:
+#    - Set your preferred AWS region
+#    - Set your Pulumi stack name
+#    - Update container and service names as needed
+
+name: Deploy to Amazon ECS with Pulumi
+
+on:
+  push:
+    branches: ['main']
+
+env:
+  AWS_REGION: us-east-1 # set this to your preferred AWS region
+  PULUMI_STACK: beta-pokemon-prod # set this to your Pulumi stack name
+  CONTAINER_NAME: beta-pokemon-app # set this to your container name
+
+permissions:
+  contents: read
+
+jobs:
+  infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      ecr-repository: ${{ steps.pulumi-up.outputs.ecr-repository }}
+      ecs-cluster: ${{ steps.pulumi-up.outputs.ecs-cluster }}
+      ecs-service: ${{ steps.pulumi-up.outputs.ecs-service }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Pulumi CLI
+        uses: pulumi/actions@v4
+
+      - name: Install Pulumi dependencies
+        run: |
+          cd infrastructure
+          npm install
+
+      - name: Deploy infrastructure with Pulumi
+        id: pulumi-up
+        uses: pulumi/actions@v4
+        with:
+          command: up
+          stack-name: ${{ env.PULUMI_STACK }}
+          work-dir: infrastructure
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+  deploy:
+    name: Build and Deploy Application
+    runs-on: ubuntu-latest
+    environment: production
+    needs: infrastructure
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ needs.infrastructure.outputs.ecr-repository }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build a docker container and push it to ECR
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Update ECS service
+        env:
+          ECS_CLUSTER: ${{ needs.infrastructure.outputs.ecs-cluster }}
+          ECS_SERVICE: ${{ needs.infrastructure.outputs.ecs-service }}
+          IMAGE_URI: ${{ steps.build-image.outputs.image }}
+        run: |
+          # Force ECS service to use the new image
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment \
+            --region $AWS_REGION
+
+          # Wait for service to stabilize
+          aws ecs wait services-stable \
+            --cluster $ECS_CLUSTER \
+            --services $ECS_SERVICE \
+            --region $AWS_REGION
