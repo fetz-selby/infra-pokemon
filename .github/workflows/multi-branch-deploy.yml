@@ -34,6 +34,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
 
+      - name: Test AWS credentials
+        run: |
+          echo "Testing AWS credentials..."
+          aws sts get-caller-identity
+          echo "AWS Region: ${{ vars.AWS_REGION }}"
+          aws ec2 describe-regions --region ${{ vars.AWS_REGION }} --max-items 1
+
       - name: Setup Pulumi CLI
         uses: pulumi/actions@v4
 
@@ -54,7 +61,7 @@ jobs:
             {
               "domain": "sels-dev.click",
               "branchName": "${{ github.ref_name }}",
-              "aws:region": "eu-north-1"
+              "aws:region": "${{ vars.AWS_REGION }}"
             }
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
