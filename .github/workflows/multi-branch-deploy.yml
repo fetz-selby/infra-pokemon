@@ -32,7 +32,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Setup Pulumi CLI
         uses: pulumi/actions@v4
@@ -58,6 +58,9 @@ jobs:
             }
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
 
   deploy:
     name: Deploy Application
@@ -87,7 +90,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Login to Amazon ECR
         if: steps.deploy-type.outputs.deploy-to-ecs == 'true'
@@ -122,7 +125,7 @@ jobs:
             --cluster ${{ needs.infrastructure.outputs.ecs-cluster }} \
             --service ${{ needs.infrastructure.outputs.ecs-service }} \
             --force-new-deployment \
-            --region ${{ env.AWS_REGION }}
-            
+            --region ${{ vars.AWS_REGION }}
+
           echo "Deployed successfully to ${{ steps.deploy-type.outputs.environment }}!"
           echo "Your app is available at: ${{ needs.infrastructure.outputs.app-url }}"
