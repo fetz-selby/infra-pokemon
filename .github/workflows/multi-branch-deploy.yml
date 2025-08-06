@@ -39,7 +39,7 @@ jobs:
           echo "Testing AWS credentials..."
           aws sts get-caller-identity
           echo "AWS Region: ${{ vars.AWS_REGION }}"
-          aws ec2 describe-regions --region ${{ vars.AWS_REGION }} --max-items=1
+          aws ec2 describe-regions --filters "Name=region-name,Values=${{ vars.AWS_REGION }}"
 
       - name: Setup Pulumi CLI
         uses: pulumi/actions@v4
