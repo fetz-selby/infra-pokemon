@@ -42,3 +42,4 @@ next-env.d.ts
 
 /app/generated/prisma
 /db/*
+/infrastructure/node_modules
