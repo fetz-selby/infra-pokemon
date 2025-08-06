@@ -49,6 +49,7 @@ jobs:
           command: up
           stack-name: beta-pokemon-${{ github.ref_name }}
           work-dir: infrastructure
+          upsert: true
           config-map: |
             {
               "domain": "sels-dev.click",
