@@ -11,8 +11,6 @@ const region = config.get('aws:region') || 'eu-north-1'
 const environment = branchName
 const fullDomain = `${branchName}.${domain}`
 
-// Get current AWS region info (removed as not used)
-
 // Create VPC for staging environment
 const vpc = new aws.ec2.Vpc('staging-vpc', {
   cidrBlock: '10.0.0.0/16',
