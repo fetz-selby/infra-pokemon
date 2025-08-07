@@ -150,8 +150,6 @@ const alb = new aws.lb.LoadBalancer('staging-alb', {
     Name: `beta-pokemon-alb-${environment}`,
     Environment: environment,
   },
-}, {
-  import: 'arn:aws:elasticloadbalancing:eu-central-1:430884201958:loadbalancer/app/beta-pokemon-alb-staging/f9c93e0d3b1c0a07',
 })
 
 // Create target group for ECS service
@@ -176,8 +174,6 @@ const targetGroup = new aws.lb.TargetGroup('staging-target-group', {
     Name: `beta-pokemon-tg-${environment}`,
     Environment: environment,
   },
-}, {
-  import: 'arn:aws:elasticloadbalancing:eu-central-1:430884201958:targetgroup/beta-pokemon-tg-staging/d1e9068f53b8dbc6',
 })
 
 // Get Route 53 hosted zone
@@ -270,24 +266,18 @@ new aws.route53.Record('branch-record', {
 })
 
 // Create ECR repository for staging
-const ecrRepository = new aws.ecr.Repository(
-  'staging-ecr',
-  {
-    name: `beta-pokemon-${environment}`,
-    imageTagMutability: 'MUTABLE',
-    imageScanningConfiguration: {
-      scanOnPush: true,
-    },
-    encryptionConfigurations: [
-      {
-        encryptionType: 'AES256',
-      },
-    ],
+const ecrRepository = new aws.ecr.Repository('staging-ecr', {
+  name: `beta-pokemon-${environment}`,
+  imageTagMutability: 'MUTABLE',
+  imageScanningConfiguration: {
+    scanOnPush: true,
   },
-  {
-    import: `beta-pokemon-${environment}`,
-  }
-)
+  encryptionConfigurations: [
+    {
+      encryptionType: 'AES256',
+    },
+  ],
+})
 
 // Create ECS cluster for staging
 const ecsCluster = new aws.ecs.Cluster('staging-cluster', {
@@ -330,8 +320,6 @@ new aws.iam.RolePolicyAttachment('staging-ecs-task-execution-role-policy', {
 const logGroup = new aws.cloudwatch.LogGroup('staging-log-group', {
   name: `/ecs/beta-pokemon-${environment}`,
   retentionInDays: 7,
-}, {
-  import: `/ecs/beta-pokemon-${environment}`,
 })
 
 // Create ECS task definition
