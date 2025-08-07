@@ -266,18 +266,24 @@ new aws.route53.Record('branch-record', {
 })
 
 // Create ECR repository for staging
-const ecrRepository = new aws.ecr.Repository('staging-ecr', {
-  name: `beta-pokemon-${environment}`,
-  imageTagMutability: 'MUTABLE',
-  imageScanningConfiguration: {
-    scanOnPush: true,
-  },
-  encryptionConfigurations: [
-    {
-      encryptionType: 'AES256',
+const ecrRepository = new aws.ecr.Repository(
+  'staging-ecr',
+  {
+    name: `beta-pokemon-${environment}`,
+    imageTagMutability: 'MUTABLE',
+    imageScanningConfiguration: {
+      scanOnPush: true,
     },
-  ],
-})
+    encryptionConfigurations: [
+      {
+        encryptionType: 'AES256',
+      },
+    ],
+  },
+  {
+    import: `beta-pokemon-${environment}`,
+  }
+)
 
 // Create ECS cluster for staging
 const ecsCluster = new aws.ecs.Cluster('staging-cluster', {
