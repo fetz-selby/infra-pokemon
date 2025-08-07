@@ -59,7 +59,7 @@ jobs:
           upsert: true
           config-map: |
             {
-              "domain": "sels-dev.click",
+              "domain": "${{ vars.DOMAIN }}",
               "branchName": "${{ github.ref_name }}",
               "aws:region": "${{ vars.AWS_REGION }}"
             }
