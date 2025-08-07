@@ -20,6 +20,8 @@ const vpc = new aws.ec2.Vpc('staging-vpc', {
     Name: `beta-pokemon-vpc-${environment}`,
     Environment: environment,
   },
+}, {
+  import: 'vpc-0728f6a34f2428c5a',
 })
 
 // Create Internet Gateway
@@ -110,6 +112,8 @@ const albSecurityGroup = new aws.ec2.SecurityGroup('staging-alb-sg', {
     Name: `beta-pokemon-alb-sg-${environment}`,
     Environment: environment,
   },
+}, {
+  import: 'sg-088008e8eb98bd164',
 })
 
 // Create security group for ECS tasks
@@ -150,6 +154,8 @@ const alb = new aws.lb.LoadBalancer('staging-alb', {
     Name: `beta-pokemon-alb-${environment}`,
     Environment: environment,
   },
+}, {
+  import: 'arn:aws:elasticloadbalancing:eu-central-1:430884201958:loadbalancer/app/beta-pokemon-alb-staging/f9c93e0d3b1c0a07',
 })
 
 // Create target group for ECS service
@@ -174,6 +180,8 @@ const targetGroup = new aws.lb.TargetGroup('staging-target-group', {
     Name: `beta-pokemon-tg-${environment}`,
     Environment: environment,
   },
+}, {
+  import: 'arn:aws:elasticloadbalancing:eu-central-1:430884201958:targetgroup/beta-pokemon-tg-staging/d1e9068f53b8dbc6',
 })
 
 // Get Route 53 hosted zone
