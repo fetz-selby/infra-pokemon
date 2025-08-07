@@ -1,1 +1,21 @@
-{  "name": "beta-pokemon-infrastructure",  "version": "1.0.0",  "description": "Pulumi infrastructure for beta-pokemon staging environment",  "main": "index.ts",  "scripts": {    "build": "tsc",    "start": "node index.js"  },  "dependencies": {    "@pulumi/aws": "^6.0.0",    "@pulumi/pulumi": "^3.0.0"  },  "devDependencies": {    "@types/node": "^20.0.0",    "typescript": "^5.0.0"  }}
+{
+  "name": "beta-pokemon-infrastructure",
+  "version": "1.0.0",
+  "description": "Pulumi infrastructure for beta-pokemon staging environment",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@pulumi/aws": "^6.0.0",
+    "@pulumi/pulumi": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}
