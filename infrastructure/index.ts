@@ -5,7 +5,7 @@ import * as aws from '@pulumi/aws'
 const config = new pulumi.Config()
 const domain = config.get('domain') || 'sels-dev.click'
 const branchName = config.get('branchName') || 'staging'
-const region = config.get('aws:region') || 'eu-north-1'
+const region = config.get('aws:region') || 'eu-central-1'
 
 // Use branch name as subdomain
 const environment = branchName
@@ -31,7 +31,7 @@ const igw = new aws.ec2.InternetGateway('staging-igw', {
   },
 })
 
-// Create public subnets in different AZs for eu-north-1
+// Create public subnets in different AZs for eu-central-1
 const publicSubnet1 = new aws.ec2.Subnet('staging-public-subnet-1', {
   vpcId: vpc.id,
   cidrBlock: '10.0.1.0/24',
@@ -360,26 +360,30 @@ const ecsTaskDefinition = new aws.ecs.TaskDefinition('staging-task', {
 })
 
 // Create ECS service
-const ecsService = new aws.ecs.Service('staging-service', {
-  cluster: ecsCluster.id,
-  taskDefinition: ecsTaskDefinition.arn,
-  launchType: 'FARGATE',
-  desiredCount: 1,
-  networkConfiguration: {
-    subnets: [publicSubnet1.id, publicSubnet2.id],
-    securityGroups: [ecsSecurityGroup.id],
-    assignPublicIp: true,
-  },
-  loadBalancers: [
-    {
-      targetGroupArn: targetGroup.arn,
-      containerName: 'beta-pokemon-app',
-      containerPort: 3000,
+const ecsService = new aws.ecs.Service(
+  'staging-service',
+  {
+    cluster: ecsCluster.id,
+    taskDefinition: ecsTaskDefinition.arn,
+    launchType: 'FARGATE',
+    desiredCount: 1,
+    networkConfiguration: {
+      subnets: [publicSubnet1.id, publicSubnet2.id],
+      securityGroups: [ecsSecurityGroup.id],
+      assignPublicIp: true,
     },
-  ],
-  deploymentMaximumPercent: 200,
-  deploymentMinimumHealthyPercent: 50,
-}, { dependsOn: [httpsListener, httpListener] })
+    loadBalancers: [
+      {
+        targetGroupArn: targetGroup.arn,
+        containerName: 'beta-pokemon-app',
+        containerPort: 3000,
+      },
+    ],
+    deploymentMaximumPercent: 200,
+    deploymentMinimumHealthyPercent: 50,
+  },
+  { dependsOn: [httpsListener, httpListener] }
+)
 
 // Export important values
 export const vpcId = vpc.id
