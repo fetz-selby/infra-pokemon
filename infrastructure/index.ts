@@ -330,6 +330,8 @@ new aws.iam.RolePolicyAttachment('staging-ecs-task-execution-role-policy', {
 const logGroup = new aws.cloudwatch.LogGroup('staging-log-group', {
   name: `/ecs/beta-pokemon-${environment}`,
   retentionInDays: 7,
+}, {
+  import: `/ecs/beta-pokemon-${environment}`,
 })
 
 // Create ECS task definition
