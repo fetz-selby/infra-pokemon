@@ -76,6 +76,18 @@ jobs:
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
+      - name: Configure Pulumi stack
+        run: |
+          cd infrastructure
+          echo "Setting up Pulumi stack configuration..."
+          pulumi plugin install resource aws
+          pulumi stack init beta-pokemon-${{ github.ref_name }} --create-if-not-exists
+          pulumi config set aws:region eu-central-1
+          pulumi config set domain sels-dev.click
+          pulumi config set branchName ${{ github.ref_name }}
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
       - name: Deploy staging infrastructure with Pulumi
         id: pulumi-up
         uses: pulumi/actions@v4
@@ -83,13 +95,6 @@ jobs:
           command: up
           stack-name: beta-pokemon-${{ github.ref_name }}
           work-dir: infrastructure
-          upsert: true
-          config-map: |
-            {
-              "domain": "sels-dev.click",
-              "branchName": "${{ github.ref_name }}",
-              "aws:region": "eu-central-1"
-            }
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
