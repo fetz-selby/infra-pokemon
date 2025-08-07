@@ -20,8 +20,6 @@ const vpc = new aws.ec2.Vpc('staging-vpc', {
     Name: `beta-pokemon-vpc-${environment}`,
     Environment: environment,
   },
-}, {
-  import: 'vpc-0728f6a34f2428c5a',
 })
 
 // Create Internet Gateway
@@ -31,6 +29,8 @@ const igw = new aws.ec2.InternetGateway('staging-igw', {
     Name: `beta-pokemon-igw-${environment}`,
     Environment: environment,
   },
+}, {
+  import: 'igw-0e961853d25aa97ed',
 })
 
 // Create public subnets in different AZs for eu-central-1
@@ -43,6 +43,8 @@ const publicSubnet1 = new aws.ec2.Subnet('staging-public-subnet-1', {
     Name: `beta-pokemon-public-subnet-1-${environment}`,
     Environment: environment,
   },
+}, {
+  import: 'subnet-0bad0184889d4aaf7',
 })
 
 const publicSubnet2 = new aws.ec2.Subnet('staging-public-subnet-2', {
@@ -54,6 +56,8 @@ const publicSubnet2 = new aws.ec2.Subnet('staging-public-subnet-2', {
     Name: `beta-pokemon-public-subnet-2-${environment}`,
     Environment: environment,
   },
+}, {
+  import: 'subnet-0e81fc3c332dbe123',
 })
 
 // Create route table for public subnets
@@ -112,8 +116,6 @@ const albSecurityGroup = new aws.ec2.SecurityGroup('staging-alb-sg', {
     Name: `beta-pokemon-alb-sg-${environment}`,
     Environment: environment,
   },
-}, {
-  import: 'sg-088008e8eb98bd164',
 })
 
 // Create security group for ECS tasks
@@ -154,8 +156,6 @@ const alb = new aws.lb.LoadBalancer('staging-alb', {
     Name: `beta-pokemon-alb-${environment}`,
     Environment: environment,
   },
-}, {
-  import: 'arn:aws:elasticloadbalancing:eu-central-1:430884201958:loadbalancer/app/beta-pokemon-alb-staging/f9c93e0d3b1c0a07',
 })
 
 // Create target group for ECS service
@@ -180,8 +180,6 @@ const targetGroup = new aws.lb.TargetGroup('staging-target-group', {
     Name: `beta-pokemon-tg-${environment}`,
     Environment: environment,
   },
-}, {
-  import: 'arn:aws:elasticloadbalancing:eu-central-1:430884201958:targetgroup/beta-pokemon-tg-staging/d1e9068f53b8dbc6',
 })
 
 // Get Route 53 hosted zone
