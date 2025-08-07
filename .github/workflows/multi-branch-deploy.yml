@@ -53,6 +53,10 @@ jobs:
         run: |
           echo "AWS_REGION env: $AWS_REGION"
           echo "Hardcoded region: eu-central-1"
+          echo "AWS CLI version:"
+          aws --version
+          echo "Pulumi version:"
+          pulumi version
 
       - name: Deploy staging infrastructure with Pulumi
         id: pulumi-up
@@ -69,9 +73,9 @@ jobs:
               "aws:region": "eu-central-1"
             }
         env:
-          PULUMI_ACCESS_TOKEN: ${{ vars.PULUMI_ACCESS_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ vars.AWS_SECRET_ACCESS_KEY }}
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: eu-central-1
 
   deploy:
