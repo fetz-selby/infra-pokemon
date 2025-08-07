@@ -81,10 +81,12 @@ jobs:
           cd infrastructure
           echo "Setting up Pulumi stack configuration..."
           pulumi plugin install resource aws
-          pulumi stack init beta-pokemon-${{ github.ref_name }}
+          pulumi stack select beta-pokemon-${{ github.ref_name }} || pulumi stack init beta-pokemon-${{ github.ref_name }}
           pulumi config set aws:region eu-central-1
           pulumi config set domain sels-dev.click
           pulumi config set branchName ${{ github.ref_name }}
+
+          echo "Stack configuration complete"
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
