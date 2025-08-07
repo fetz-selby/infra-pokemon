@@ -5,7 +5,7 @@ on:
     branches-ignore: ['main'] # Exclude main branch
 
 env:
-  AWS_REGION: ${{ vars.AWS_REGION }}
+  AWS_REGION: eu-central-1
 
 jobs:
   infrastructure:
@@ -32,14 +32,14 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: eu-central-1
 
       - name: Test AWS credentials
         run: |
           echo "Testing AWS credentials..."
           aws sts get-caller-identity
-          echo "AWS Region: ${{ vars.AWS_REGION }}"
-          aws ec2 describe-regions --filters "Name=region-name,Values=${{ vars.AWS_REGION }}"
+          echo "AWS Region: eu-central-1"
+          aws ec2 describe-regions --filters "Name=region-name,Values=eu-central-1"
 
       - name: Setup Pulumi CLI
         uses: pulumi/actions@v4
@@ -48,6 +48,11 @@ jobs:
         run: |
           cd infrastructure
           npm install
+
+      - name: Debug environment variables
+        run: |
+          echo "AWS_REGION env: $AWS_REGION"
+          echo "Hardcoded region: eu-central-1"
 
       - name: Deploy staging infrastructure with Pulumi
         id: pulumi-up
@@ -59,15 +64,15 @@ jobs:
           upsert: true
           config-map: |
             {
-              "domain": "${{ vars.DOMAIN }}",
+              "domain": "sels-dev.click",
               "branchName": "${{ github.ref_name }}",
-              "aws:region": "${{ vars.AWS_REGION }}"
+              "aws:region": "eu-central-1"
             }
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_REGION: eu-central-1
 
   deploy:
     name: Deploy Application
@@ -97,7 +102,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: eu-central-1
 
       - name: Login to Amazon ECR
         if: steps.deploy-type.outputs.deploy-to-ecs == 'true'
@@ -132,7 +137,7 @@ jobs:
             --cluster ${{ needs.infrastructure.outputs.ecs-cluster }} \
             --service ${{ needs.infrastructure.outputs.ecs-service }} \
             --force-new-deployment \
-            --region ${{ vars.AWS_REGION }}
+            --region eu-central-1
 
           echo "Deployed successfully to ${{ steps.deploy-type.outputs.environment }}!"
           echo "Your app is available at: ${{ needs.infrastructure.outputs.app-url }}"
